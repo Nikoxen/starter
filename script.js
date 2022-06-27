@@ -131,57 +131,115 @@ const renderError = function (msg) {
 //     });
 // };
 
-const getCountryData = function (country) {
-  fetch(`https://restcountries.com/v3.1/name/${country}`)
-    .then(response => {
-      console.log(response);
-      if (!response.ok) {
-        throw new Error(`Country not found ${response.status}`);
-      }
+const getJSON = function (url, errorMsg = 'Something went wrong') {
+  return fetch(url).then(response => {
+    if (!response.ok) {
+      throw new Error(`${errorMsg} (${response.status})`);
+    }
+    return response.json();
+  });
+}; //returns a promise
 
-      return response.json();
-    })
+const getCountryData = function (country) {
+  getJSON(`https://restcountries.com/v3.1/name/${country}`, 'Country not found')
     .then(data => {
       renderCountry(data);
-      //const neighbour = data[0].borders;
-      const neighbour = 'sdfghgf';
-      if (!neighbour) return;
+      const neighbour = data[0].borders;
 
-      return neighbour.forEach(code => {
-        fetch(`https://restcountries.com/v3.1/alpha?codes=${code}`).then(
-          response =>
-            response.json().then(data => renderCountry(data, 'neighbour'))
-          // response => {
-          //   if (!response.ok) {
-          //     throw new Error(`Country not found ${response}`);
-          //   }
+      if (!neighbour) throw new Error('No neighbour found!');
 
-          //   return response
-          //     .json()
-
-          //     .then(data => renderCountry(data, 'neighbour'));
-          // }
-        );
-      });
-    })
-    .then(response => {
-      console.log(response);
-      if (!response.ok) {
-        throw new Error(`Country not found ${response.status}`);
+      try {
+        neighbour.forEach(code => {
+          getJSON(
+            `https://restcountries.com/v3.1/alpha?codes=${code}`,
+            'Country not found'
+          ).then(data => renderCountry(data, 'neighbour'));
+        });
+      } catch (error) {
+        getJSON(
+          `https://restcountries.com/v3.1/alpha?codes=${neighbour}`,
+          'Countryyyyyy not found'
+        ).then(data => renderCountry(data, 'neighbour'));
       }
     })
     .catch(err => {
       console.error(`${err}🎇🎇🎇🎇🤣 `);
       renderError(`Something went wrong 🎇🎇🎇${err.message}. Try again!`);
-      //catch de promise gönderir.
     })
     .finally(() => {
       countriesContainer.style.opacity = 1;
-      //finally her kosulda gerceklesecek kisim
     });
 };
 
 btn.addEventListener('click', function () {
-  getCountryData('turkey');
+  getCountryData('australia');
 });
+
+//////////////////////////////////
+// const getCountryData = function (country) {
+//   fetch(`https://restcountries.com/v3.1/name/${country}`)
+//     .then(response => {
+//       console.log(response);
+//       if (!response.ok) {
+//         throw new Error(`Countryyyy not found ${response.status}`);
+//       }
+
+//       return response.json();
+//     })
+//     .then(data => {
+//       renderCountry(data);
+//       const neighbour = data[0].borders;
+
+//       if (!neighbour) return;
+
+//       // fetch(`https://restcountries.com/v3.1/alpha?codes=${neighbour}`).then(
+//       //   response => {
+//       //     if (!response.ok) {
+//       //       throw new Error(`Country not found ${response.status}`);
+//       //     }
+
+//       //     return response
+//       //       .json()
+
+//       //       .then(data => renderCountry(data, 'neighbour'));
+//       //   }
+//       // );
+//       return neighbour.forEach(code => {
+//         fetch(`https://restcountries.com/v3.1/alpha?codes=${code}`).then(
+//           response =>
+//             response.json().then(data => renderCountry(data, 'neighbour'))
+//           // response => {
+//           //   if (!response.ok) {
+//           //     throw new Error(`Country not found ${response}`);
+//           //   }
+
+//           //   return response
+//           //     .json()
+
+//           //     .then(data => renderCountry(data, 'neighbour'));
+//           // }
+//         );
+//       });
+//     })
+//     .catch(err => {
+//       console.error(`${err}🎇🎇🎇🎇🤣 `);
+//       renderError(`Something went wrong 🎇🎇🎇${err.message}. Try again!`);
+//       //catch de promise gönderir.
+//     })
+//     .finally(() => {
+//       countriesContainer.style.opacity = 1;
+//       //finally her kosulda gerceklesecek kisim
+//     });
+// };
+
+// btn.addEventListener('click', function () {
+//   getCountryData('turkey');
+// });
 //getCountryData('turkdfghjhgey');
+
+// .then(response => {
+//   console.log(response);
+//   if (!response.ok) {
+//     throw new Error(`Country not found ${response.status}`);
+//   }
+// })
